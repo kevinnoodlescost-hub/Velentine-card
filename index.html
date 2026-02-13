@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -47,7 +47,7 @@ button:hover{ background:#e60039; }
 /* Trái tim */
 .heart{
     position:fixed;
-    z-index:2;              /* trên nền, dưới khung thiệp */
+    z-index:2;
     pointer-events:none;
     animation:float 6s linear infinite;
 }
@@ -57,10 +57,10 @@ button:hover{ background:#e60039; }
     100%{ transform:translateY(-20vh); opacity:0; }
 }
 
-/* Xoài PNG */
+/* Xoài JPG */
 .mango{
     position:fixed;
-    z-index:1;              /* thấp hơn heart, cao hơn nền */
+    z-index:1;
     pointer-events:none;
     animation:mangoFloat 10s linear infinite;
     opacity:0.95;
@@ -116,19 +116,17 @@ setInterval(()=>{
     setTimeout(()=>heart.remove(),6000);
 },500);
 
-/* Xoài PNG bay nền */
+/* Xoài JPG bay nền */
 setInterval(()=>{
     const mango = document.createElement("div");
     mango.className = "mango";
-    mango.innerHTML = `<img src="mango.png" alt="mango">`;
+    mango.innerHTML = `<img src="mango.jpg" alt="mango">`;
     mango.style.left = (Math.random()*100) + "vw";
 
-    /* random kích thước xoài */
-    const size = Math.random()*20 + 44; // 44-64px
+    const size = Math.random()*20 + 44;
     mango.querySelector("img").style.width = size + "px";
 
-    /* random tốc độ bay */
-    const duration = Math.random()*6 + 8; // 8-14s
+    const duration = Math.random()*6 + 8;
     mango.style.animationDuration = duration + "s";
 
     document.body.appendChild(mango);
