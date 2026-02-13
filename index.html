@@ -7,213 +7,477 @@
 
   <style>
     :root{
-      /* Thang responsive tổng (dùng clamp để co giãn mượt) */
-      --pad: clamp(18px, 4vw, 40px);
-      --radius: clamp(14px, 3vw, 22px);
-      --cardW: min(560px, calc(100vw - 32px));
-      --h2: clamp(22px, 3.6vw, 34px);
-      --p: clamp(14px, 2.3vw, 18px);
-      --btn: clamp(14px, 2.4vw, 16px);
-      --imgW: clamp(200px, 55vw, 320px);
-
-      --heartMin: clamp(16px, 2.8vw, 24px);
-      --heartMax: clamp(26px, 4.6vw, 42px);
+      --bg1:#ff9a9e;
+      --bg2:#fad0c4;
+      --cardW: min(860px, calc(100vw - 28px));
+      --radius: clamp(14px, 2.8vw, 22px);
+      --pad: clamp(16px, 3.8vw, 36px);
+      --h1: clamp(22px, 3.6vw, 36px);
+      --h2: clamp(18px, 3vw, 28px);
+      --p:  clamp(14px, 2.1vw, 18px);
+      --btn: clamp(14px, 2.1vw, 16px);
+      --shadow: 0 12px 34px rgba(0,0,0,0.22);
     }
 
+    *{ box-sizing:border-box; }
     body{
       margin:0;
       font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg,#ff9a9e,#fad0c4);
-      display:flex;
-      justify-content:center;
-      align-items:center;
+      background: linear-gradient(135deg,var(--bg1),var(--bg2));
       min-height:100vh;
-      text-align:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       overflow:hidden;
+      text-align:center;
     }
 
-    .container{
-      position:relative;
-      z-index:3;
-      background:#fff;
-      padding: var(--pad);
-      border-radius: var(--radius);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      width: var(--cardW);
-      animation: fadeIn 1.2s ease;
-    }
-
-    h2{
-      margin: 0 0 12px 0;
-      font-size: var(--h2);
-      line-height: 1.15;
-    }
-
-    p{
-      margin: 0 0 16px 0;
-      font-size: var(--p);
-      line-height: 1.6;
-    }
-
-    button{
-      padding: clamp(10px, 2.6vw, 12px) clamp(18px, 4.5vw, 26px);
-      background:#ff4d6d;
-      color:#fff;
-      border:none;
-      border-radius:999px;
-      cursor:pointer;
-      font-size: var(--btn);
-    }
-    button:hover{ background:#e60039; }
-
-    .photo{
-      display:block;
-      width: var(--imgW);
-      max-width:100%;
-      height:auto;
-      margin: 14px auto 0 auto;
-      border-radius: clamp(10px, 2.5vw, 16px);
-    }
-
-    @keyframes fadeIn{
-      from{opacity:0; transform:translateY(18px);}
-      to{opacity:1; transform:translateY(0);}
-    }
-
-    /* Tim bay */
+    /* Lớp nền tim (không đè nội dung chính) */
     .heart{
       position:fixed;
-      z-index:2;            /* dưới card */
+      z-index:1;
       pointer-events:none;
-      left:0;
-      top:0;
       opacity:0;
-      will-change: transform, opacity;
-      animation-name: floatUp;
-      animation-timing-function: linear;
-      animation-fill-mode: forwards;
+      will-change:transform, opacity;
+      animation: floatUp linear forwards;
       filter: drop-shadow(0 4px 10px rgba(0,0,0,0.18));
     }
-
-    /* Bay từ dưới lên + hơi lệch ngang */
     @keyframes floatUp{
       0%   { transform: translate(var(--x0), 110vh) rotate(0deg); opacity:0; }
       12%  { opacity:1; }
       100% { transform: translate(var(--x1), -20vh) rotate(360deg); opacity:0; }
     }
 
-    /* Tôn trọng người dùng giảm chuyển động */
+    /* Stage */
+    .stage{
+      position:relative;
+      z-index:3;
+      width:var(--cardW);
+    }
+
+    /* Card chung */
+    .panel{
+      background:#fff;
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      padding:var(--pad);
+      margin: 0 auto;
+    }
+
+    .title{
+      font-size:var(--h1);
+      margin:0 0 10px 0;
+      line-height:1.15;
+    }
+    .subtitle{
+      font-size:var(--h2);
+      margin:0 0 12px 0;
+      line-height:1.25;
+    }
+    .text{
+      font-size:var(--p);
+      line-height:1.7;
+      margin:0 0 14px 0;
+    }
+
+    .btnRow{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+
+    button{
+      border:none;
+      border-radius:999px;
+      padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4.2vw, 26px);
+      font-size:var(--btn);
+      cursor:pointer;
+      color:#fff;
+      background:#ff4d6d;
+      transition: transform .08s ease, opacity .2s ease;
+    }
+    button:hover{ opacity:.92; }
+    button:active{ transform: translateY(1px); }
+
+    .btnGhost{
+      background:#111;
+      opacity:.85;
+    }
+
+    /* Ẩn/hiện scene */
+    .scene{ display:none; }
+    .scene.active{ display:block; }
+
+    /* ====== Envelope (Phong bì + tem) ====== */
+    .envelopeWrap{
+      display:grid;
+      place-items:center;
+      gap:16px;
+    }
+
+    .envelope{
+      width: min(520px, 92vw);
+      aspect-ratio: 16/10;
+      position:relative;
+      border-radius:18px;
+      background: #f7f2ee;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.18);
+      overflow:hidden;
+    }
+
+    /* thân phong bì */
+    .env-body{
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, #fff 0%, #f6efe9 100%);
+    }
+
+    /* nắp phong bì */
+    .env-flap{
+      position:absolute;
+      left:0; right:0;
+      top:-10%;
+      height:65%;
+      background: linear-gradient(180deg, #f0e6df 0%, #e9ddd4 100%);
+      clip-path: polygon(0 0, 100% 0, 50% 80%);
+      transform-origin: 50% 0%;
+      transition: transform .9s ease;
+    }
+
+    /* tem */
+    .stamp{
+      position:absolute;
+      right:6%;
+      top:10%;
+      width: clamp(56px, 10vw, 86px);
+      aspect-ratio: 1/1.15;
+      border-radius:10px;
+      background: #ffefef;
+      border: 2px dashed rgba(0,0,0,0.18);
+      display:grid;
+      place-items:center;
+      font-weight:700;
+      color:#ff4d6d;
+      transform: rotate(7deg);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+      user-select:none;
+    }
+
+    /* con dấu đóng */
+    .seal{
+      position:absolute;
+      left:50%;
+      top:62%;
+      transform: translate(-50%,-50%);
+      width: clamp(44px, 8vw, 64px);
+      height: clamp(44px, 8vw, 64px);
+      border-radius:999px;
+      background: radial-gradient(circle at 30% 30%, #ff97aa, #ff4d6d);
+      box-shadow: inset 0 0 0 4px rgba(255,255,255,0.55);
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-weight:800;
+      user-select:none;
+    }
+
+    /* lá thư bên trong */
+    .letter{
+      position:absolute;
+      left:6%;
+      right:6%;
+      bottom:-56%;
+      height:82%;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+      padding: clamp(14px, 3vw, 22px);
+      text-align:left;
+      transition: transform 1s ease;
+    }
+
+    .letter h3{
+      margin:0 0 8px 0;
+      font-size: clamp(16px, 2.6vw, 20px);
+    }
+    .letter p{
+      margin:0;
+      font-size: clamp(13px, 2.1vw, 16px);
+      line-height:1.65;
+    }
+    .letter .sig{
+      margin-top: 10px;
+      font-weight:700;
+    }
+
+    /* trạng thái mở */
+    .open .env-flap{ transform: rotateX(180deg); }
+    .open .letter{ transform: translateY(-58%); }
+
+    /* ====== Map scene ====== */
+    .mapGrid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: clamp(12px, 2.8vw, 18px);
+      align-items:stretch;
+      text-align:left;
+      margin-top: 10px;
+    }
+    .mapBox{
+      background:#fff;
+      border-radius: 16px;
+      overflow:hidden;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+      min-height: clamp(220px, 40vh, 360px);
+    }
+    iframe{
+      width:100%;
+      height:100%;
+      border:0;
+      display:block;
+    }
+    .context{
+      background: rgba(255,255,255,0.78);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+    }
+    .context .k{
+      font-weight:800;
+      margin:0 0 10px 0;
+      font-size: clamp(16px, 2.4vw, 20px);
+    }
+
+    /* Mobile: map xếp dọc */
+    @media (max-width: 820px){
+      .mapGrid{ grid-template-columns: 1fr; }
+      .context{ text-align:left; }
+    }
+
+    /* Ảnh cuối */
+    .photo{
+      display:block;
+      width: clamp(210px, 52vw, 360px);
+      max-width:100%;
+      height:auto;
+      margin: 14px auto 0 auto;
+      border-radius: clamp(12px, 2.4vw, 18px);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+    }
+
+    /* giảm chuyển động nếu người dùng yêu cầu */
     @media (prefers-reduced-motion: reduce){
-      .heart{ animation: none; opacity: 0; }
-      .container{ animation: none; }
+      .heart{ animation:none; opacity:0; }
+      .env-flap, .letter{ transition:none; }
     }
   </style>
 </head>
 
 <body>
-  <div class="container" id="card">
-    <h2>💖 Gửi bé Kịt 💖</h2>
-    <p>
-      Will you be my valentine this year bbi?<br>
-      It's been 4 months and we have been through ups and downs,
-      even after that, I still want you to be my valentine
-      for this year and for years forever after.
-    </p>
-    <button onclick="openCard()">Bấm vào đây</button>
+  <!-- Audio: bạn upload file music.mp3 cùng thư mục -->
+  <audio id="bgm" src="music.mp3" preload="auto" loop></audio>
+
+  <div class="stage">
+
+    <!-- SCENE 1: Envelope -->
+    <section id="sceneEnvelope" class="scene active">
+      <div class="panel envelopeWrap">
+        <h1 class="title">📬 A Letter For Bé Kịt</h1>
+        <p class="text">Có một lá thư nhỏ… Anh muốn bé mở ra theo cách “đúng kiểu thư tay”.</p>
+
+        <div id="envelope" class="envelope" aria-label="Phong bì thư">
+          <div class="env-body"></div>
+          <div class="env-flap"></div>
+
+          <div class="stamp">LOVE<br>STAMP</div>
+          <div class="seal">💌</div>
+
+          <div class="letter">
+            <h3>Gửi bé Kịt,</h3>
+            <p>
+              Vậy là mình đã đi cùng nhau được 4 tháng. Có lúc vui, có lúc không dễ,
+              nhưng điều anh chắc nhất là: anh vẫn muốn nắm tay bé và cùng đi tiếp.<br><br>
+              Hôm nay anh viết lá thư này để hỏi một điều đơn giản thôi…
+            </p>
+            <p class="sig">— Anh</p>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button id="btnOpen">Mở thư ✉️</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 2: Ask -->
+    <section id="sceneAsk" class="scene">
+      <div class="panel">
+        <h2 class="subtitle">Bé có đồng ý làm Valentine của anh không? 💖</h2>
+        <p class="text">
+          Không chỉ năm nay… mà nếu bé cho phép, cả những năm sau nữa.
+        </p>
+        <div class="btnRow">
+          <button id="btnYes">Đồng ý ✅</button>
+          <button id="btnNo" class="btnGhost">Để bé suy nghĩ thêm 😳</button>
+        </div>
+        <p id="noHint" class="text" style="display:none; margin-top:12px;">
+          Anh sẽ đứng đây đợi câu trả lời “Đồng ý” đó nha 😄
+        </p>
+      </div>
+    </section>
+
+    <!-- SCENE 3: Map + Context -->
+    <section id="sceneMap" class="scene">
+      <div class="panel">
+        <h2 class="subtitle">Nơi mình gặp nhau lần đầu 📍</h2>
+        <p class="text">
+          Bản đồ ở đây, còn “câu chuyện” thì anh để ngay bên cạnh.
+        </p>
+
+        <div class="mapGrid">
+          <div class="mapBox">
+            <!-- TODO: thay LAT,LNG bằng tọa độ thật -->
+            <iframe
+              id="mapFrame"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.5115795957554!2d106.65532687435655!3d10.77207498937643!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752ec3c161a3fb%3A0xef77cd47a1cc691e!2sHCMC%20University%20of%20Technology%20(HCMUT)!5e0!3m2!1sen!2s!4v1770971711669!5m2!1sen!2s"
+              title="Bản đồ nơi gặp nhau lần đầu">
+            </iframe>
+          </div>
+
+          <div class="context">
+            <p class="k">Chuyện của tụi mình</p>
+            <p class="text" style="margin:0;">
+              <!-- TODO: thay nội dung kỷ niệm thật của bạn -->
+              Anh vẫn nhớ khoảnh khắc đó—một cuộc gặp rất “tình cờ” nhưng lại thành “định mệnh”.
+              Có thể bé không nhớ từng chi tiết, nhưng với anh, đó là ngày mọi thứ bắt đầu có ý nghĩa hơn.
+              <br><br>
+              Và anh muốn mình có thêm thật nhiều “điểm đánh dấu” như vậy—cùng nhau.
+            </p>
+
+            <div class="btnRow" style="justify-content:flex-start; margin-top:14px;">
+              <button id="btnToFinal">Đi tiếp 👉</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCENE 4: Final (giữ tinh thần code cũ) -->
+    <section id="sceneFinal" class="scene">
+      <div class="panel" id="finalCard">
+        <h2 class="subtitle">Happy Valentine ❤️</h2>
+        <p class="text">
+          Anh thương bé Kịt rất nhiều. <br>
+          Cảm ơn vì đã đồng hành cùng anh nha bé và mong là tụi mình
+          sẽ đồng hành cùng nhau lâu thật là lâu nè
+        </p>
+        <img class="photo" src="ảnh đôi.jpg" alt="Ảnh đôi">
+      </div>
+    </section>
+
   </div>
 
   <script>
-    const card = document.getElementById("card");
+    // ===== Helpers =====
+    const $ = (id) => document.getElementById(id);
+    const sceneEnvelope = $("sceneEnvelope");
+    const sceneAsk = $("sceneAsk");
+    const sceneMap = $("sceneMap");
+    const sceneFinal = $("sceneFinal");
+    const envelope = $("envelope");
+    const bgm = $("bgm");
 
-    function openCard(){
-      card.innerHTML = `
-        <h2>Happy Valentine ❤️</h2>
-        <p>
-          Anh thương bé Kịt rất nhiều. <br>
-          Cảm ơn vì đã đồng hành cùng anh nha bé và mong là tụi mình
-          sẽ đồng hành cùng nhau lâu thật lâu
-        </p>
-        <img class="photo" src="ảnh đôi.jpg" alt="Ảnh đôi">
-      `;
+    function showScene(scene){
+      for (const s of [sceneEnvelope, sceneAsk, sceneMap, sceneFinal]) s.classList.remove("active");
+      scene.classList.add("active");
     }
 
-    // Lấy vùng cấm spawn (theo card), có thêm "đệm" để tim không chạm sát card
-    function getNoSpawnZone(){
-      const r = card.getBoundingClientRect();
-      const pad = Math.max(16, Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.04)); // ~4% màn hình
-      return {
-        left: r.left - pad,
-        right: r.right + pad,
-        top: r.top - pad,
-        bottom: r.bottom + pad
-      };
+    // ===== Audio play (needs user gesture) =====
+    async function tryPlayMusic(){
+      try{
+        // một số trình duyệt cần volume nhỏ trước
+        bgm.volume = 0.85;
+        await bgm.play();
+      }catch(e){
+        // nếu vẫn bị chặn, bỏ qua (người dùng có thể bật thủ công)
+        console.log("Autoplay blocked:", e);
+      }
     }
 
+    // ===== Hearts: spawn khắp màn hình nhưng tránh vùng nội dung chính =====
     function rand(min, max){ return Math.random() * (max - min) + min; }
 
-    // Chọn điểm spawn (x,y) "khắp màn hình" nhưng tránh vùng cấm
+    function getNoSpawnZone(){
+      const activePanel = document.querySelector(".scene.active .panel");
+      const r = activePanel.getBoundingClientRect();
+      const pad = Math.max(16, Math.round(Math.min(innerWidth, innerHeight) * 0.05));
+      return { left:r.left-pad, right:r.right+pad, top:r.top-pad, bottom:r.bottom+pad };
+    }
+
     function pickSpawnPoint(){
-      const zone = getNoSpawnZone();
-      const W = window.innerWidth;
-      const H = window.innerHeight;
+      const z = getNoSpawnZone();
+      const W = innerWidth, H = innerHeight;
 
-      // thử tối đa 12 lần để tìm điểm hợp lệ
-      for(let i=0;i<12;i++){
+      for(let i=0;i<14;i++){
         const x = rand(0, W);
-        const y = rand(0, H);  // spawn khắp màn hình (không chỉ dưới)
-        const inside =
-          x >= zone.left && x <= zone.right &&
-          y >= zone.top  && y <= zone.bottom;
-
-        if(!inside) return {x, y};
+        const y = rand(0, H);
+        const inside = (x>=z.left && x<=z.right && y>=z.top && y<=z.bottom);
+        if(!inside) return {x,y};
       }
-
-      // fallback: nếu hiếm khi không tìm được, spawn ở mép
-      return {x: rand(0, W), y: rand(0, 40)};
+      return {x: rand(0,W), y: rand(0,40)};
     }
 
     function spawnHeart(){
-      const {x, y} = pickSpawnPoint();
-
+      const {x,y} = pickSpawnPoint();
       const heart = document.createElement("div");
       heart.className = "heart";
       heart.textContent = "❤️";
 
-      // Kích thước tim responsive
-      const root = getComputedStyle(document.documentElement);
-      const hMin = parseFloat(root.getPropertyValue("--heartMin"));
-      const hMax = parseFloat(root.getPropertyValue("--heartMax"));
-      const size = rand(hMin, hMax);
+      // size responsive
+      const minSize = Math.max(16, Math.min(innerWidth, innerHeight) * 0.028);
+      const maxSize = Math.max(26, Math.min(innerWidth, innerHeight) * 0.052);
+      const size = rand(minSize, maxSize);
       heart.style.fontSize = size + "px";
 
-      // Đặt vị trí spawn tại (x,y)
       heart.style.left = x + "px";
       heart.style.top  = y + "px";
 
-      // Độ lệch ngang khi bay (nhẹ nhàng)
-      const drift = rand(-40, 40);           // px
+      const drift = rand(-50, 50);
       heart.style.setProperty("--x0", "0px");
       heart.style.setProperty("--x1", drift + "px");
 
-      // Tốc độ bay random (nhẹ hơn trên mobile)
-      const isMobile = window.matchMedia("(max-width: 600px)").matches;
-      const duration = isMobile ? rand(5.5, 7.5) : rand(6, 9);
+      const isMobile = matchMedia("(max-width: 600px)").matches;
+      const duration = isMobile ? rand(5.8, 7.8) : rand(6.2, 9.2);
       heart.style.animationDuration = duration + "s";
 
       document.body.appendChild(heart);
       setTimeout(() => heart.remove(), duration * 1000 + 200);
     }
 
-    // Nhịp spawn: mobile thưa hơn để mượt
-    function startHearts(){
-      const isMobile = window.matchMedia("(max-width: 600px)").matches;
-      const interval = isMobile ? 650 : 450;
-      setInterval(spawnHeart, interval);
-    }
+    const isMobile = matchMedia("(max-width: 600px)").matches;
+    setInterval(spawnHeart, isMobile ? 650 : 450);
 
-    startHearts();
+    // ===== Flow =====
+    $("btnOpen").addEventListener("click", async () => {
+      envelope.classList.add("open");
+      await tryPlayMusic();            // nhạc bắt đầu khi mở thư
+      setTimeout(() => showScene(sceneAsk), 1100);
+    });
 
-    // Khi xoay màn hình / resize: không cần làm gì nhiều, vì mỗi lần spawn sẽ tính vùng cấm mới
+    $("btnNo").addEventListener("click", () => {
+      $("noHint").style.display = "block";
+    });
+
+    $("btnYes").addEventListener("click", () => {
+      showScene(sceneMap);
+    });
+
+    $("btnToFinal").addEventListener("click", () => {
+      showScene(sceneFinal);
+    });
   </script>
 </body>
 </html>
