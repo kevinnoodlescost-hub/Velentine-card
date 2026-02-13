@@ -144,6 +144,13 @@
       display:block;
     }
 
+    /* ✅ (1) Khi mở thư: dời stamp sang phải / lên một chút để tránh chèn chữ */
+    .open .stamp{
+      right: 2%;
+      top: 6%;
+      transform: rotate(7deg); /* giữ cảm giác nghiêng tự nhiên */
+    }
+
     .seal{
       position:absolute;
       left:50%;
@@ -295,24 +302,20 @@
       aspect-ratio: 16/10;
     }
 
-    /* ===== TRANG 1: LÁ THƯ GẦN FULL PHONG BÌ =====
-       - height tăng mạnh
-       - bottom âm hơn để khi đóng vẫn nằm gọn
-       - khi open: kéo lên nhiều hơn để nhìn gần full */
+    /* ===== TRANG 1: LÁ THƯ GẦN FULL PHONG BÌ ===== */
     .letter{
       left: 4.5%;
       right: 4.5%;
-      height: 94%;                 /* gần full */
-      bottom: -72%;                /* giấu sâu hơn khi chưa mở */
+      height: 94%;
+      bottom: -72%;
       padding: clamp(16px, 3.2vw, 28px);
       border-radius: 16px;
     }
 
     .open .letter{
-      transform: translateY(-86%); /* mở ra chiếm gần full phong bì */
+      transform: translateY(-86%);
     }
 
-    /* Dễ đọc hơn trong thư */
     .letter h3{
       font-size: clamp(18px, 2.8vw, 22px);
     }
@@ -326,7 +329,7 @@
 
     /* ===== TRANG 2: ZOOM Ô CHỮ BÊN PHẢI + CUỘN TRONG Ô ===== */
     .mapGrid{
-      grid-template-columns: 1fr 1.18fr; /* ô chữ bự hơn cột map */
+      grid-template-columns: 1fr 1.18fr;
     }
 
     .mapBox{
@@ -340,7 +343,6 @@
       font-size: clamp(18px, 2.6vw, 22px);
     }
 
-    /* Giữ cuộn trong ô (đúng ý bạn) + hiển thị nhiều hơn trước */
     .context .text{
       font-size: clamp(14px, 2.2vw, 17px);
       line-height: 1.82;
@@ -354,11 +356,13 @@
       border-radius: 99px;
     }
 
-    /* Mobile tối ưu */
     @media (max-width: 600px){
       .envelope{ width: 98vw; }
       .open .letter{ transform: translateY(-88%); }
       .context .text{ max-height: 52vh; }
+
+      /* ✅ stamp trên mobile: đẩy sát hơn nữa */
+      .open .stamp{ right: 1.5%; top: 5%; }
     }
   </style>
 </head>
