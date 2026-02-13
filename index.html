@@ -6,6 +6,20 @@
   <title>Thiệp Valentine</title>
 
   <style>
+    :root{
+      /* Thang responsive tổng (dùng clamp để co giãn mượt) */
+      --pad: clamp(18px, 4vw, 40px);
+      --radius: clamp(14px, 3vw, 22px);
+      --cardW: min(560px, calc(100vw - 32px));
+      --h2: clamp(22px, 3.6vw, 34px);
+      --p: clamp(14px, 2.3vw, 18px);
+      --btn: clamp(14px, 2.4vw, 16px);
+      --imgW: clamp(200px, 55vw, 320px);
+
+      --heartMin: clamp(16px, 2.8vw, 24px);
+      --heartMax: clamp(26px, 4.6vw, 42px);
+    }
+
     body{
       margin:0;
       font-family: "Segoe UI", sans-serif;
@@ -13,7 +27,7 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      height:100vh;
+      min-height:100vh;
       text-align:center;
       overflow:hidden;
     }
@@ -22,46 +36,76 @@
       position:relative;
       z-index:3;
       background:#fff;
-      padding:40px;
-      border-radius:20px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.2);
-      max-width:520px;
-      width: min(520px, calc(100vw - 48px));
-      animation:fadeIn 1.5s ease;
+      padding: var(--pad);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: var(--cardW);
+      animation: fadeIn 1.2s ease;
+    }
+
+    h2{
+      margin: 0 0 12px 0;
+      font-size: var(--h2);
+      line-height: 1.15;
+    }
+
+    p{
+      margin: 0 0 16px 0;
+      font-size: var(--p);
+      line-height: 1.6;
     }
 
     button{
-      padding:12px 25px;
+      padding: clamp(10px, 2.6vw, 12px) clamp(18px, 4.5vw, 26px);
       background:#ff4d6d;
       color:#fff;
       border:none;
-      border-radius:25px;
+      border-radius:999px;
       cursor:pointer;
-      font-size:16px;
+      font-size: var(--btn);
     }
     button:hover{ background:#e60039; }
 
+    .photo{
+      display:block;
+      width: var(--imgW);
+      max-width:100%;
+      height:auto;
+      margin: 14px auto 0 auto;
+      border-radius: clamp(10px, 2.5vw, 16px);
+    }
+
     @keyframes fadeIn{
-      from{opacity:0; transform:translateY(20px);}
+      from{opacity:0; transform:translateY(18px);}
       to{opacity:1; transform:translateY(0);}
     }
 
-    /* Tim bay: dùng fixed để bay “trên nền” ổn định */
+    /* Tim bay */
     .heart{
       position:fixed;
-      z-index:2;
+      z-index:2;            /* dưới card */
       pointer-events:none;
-      animation: floatUp 6s linear forwards;
-      left: 0;
-      top: 0;
-      opacity: 0;
+      left:0;
+      top:0;
+      opacity:0;
       will-change: transform, opacity;
+      animation-name: floatUp;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.18));
     }
 
+    /* Bay từ dưới lên + hơi lệch ngang */
     @keyframes floatUp{
-      0%   { transform: translateY(110vh); opacity:0; }
-      10%  { opacity:1; }
-      100% { transform: translateY(-20vh); opacity:0; }
+      0%   { transform: translate(var(--x0), 110vh) rotate(0deg); opacity:0; }
+      12%  { opacity:1; }
+      100% { transform: translate(var(--x1), -20vh) rotate(360deg); opacity:0; }
+    }
+
+    /* Tôn trọng người dùng giảm chuyển động */
+    @media (prefers-reduced-motion: reduce){
+      .heart{ animation: none; opacity: 0; }
+      .container{ animation: none; }
     }
   </style>
 </head>
@@ -79,30 +123,97 @@
   </div>
 
   <script>
+    const card = document.getElementById("card");
+
     function openCard(){
-      document.getElementById("card").innerHTML = `
+      card.innerHTML = `
         <h2>Happy Valentine ❤️</h2>
         <p>
           Anh thương bé Kịt rất nhiều. <br>
           Cảm ơn vì đã đồng hành cùng anh nha bé và mong là tụi mình
           sẽ đồng hành cùng nhau lâu thật lâu
         </p>
-        <img src="ảnh đôi.jpg" style="max-width:100%; height:auto;" width="250" alt="Ảnh đôi">
+        <img class="photo" src="ảnh đôi.jpg" alt="Ảnh đôi">
       `;
     }
 
-    // Tim bay
-    setInterval(() => {
+    // Lấy vùng cấm spawn (theo card), có thêm "đệm" để tim không chạm sát card
+    function getNoSpawnZone(){
+      const r = card.getBoundingClientRect();
+      const pad = Math.max(16, Math.round(Math.min(window.innerWidth, window.innerHeight) * 0.04)); // ~4% màn hình
+      return {
+        left: r.left - pad,
+        right: r.right + pad,
+        top: r.top - pad,
+        bottom: r.bottom + pad
+      };
+    }
+
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+
+    // Chọn điểm spawn (x,y) "khắp màn hình" nhưng tránh vùng cấm
+    function pickSpawnPoint(){
+      const zone = getNoSpawnZone();
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      // thử tối đa 12 lần để tìm điểm hợp lệ
+      for(let i=0;i<12;i++){
+        const x = rand(0, W);
+        const y = rand(0, H);  // spawn khắp màn hình (không chỉ dưới)
+        const inside =
+          x >= zone.left && x <= zone.right &&
+          y >= zone.top  && y <= zone.bottom;
+
+        if(!inside) return {x, y};
+      }
+
+      // fallback: nếu hiếm khi không tìm được, spawn ở mép
+      return {x: rand(0, W), y: rand(0, 40)};
+    }
+
+    function spawnHeart(){
+      const {x, y} = pickSpawnPoint();
+
       const heart = document.createElement("div");
       heart.className = "heart";
       heart.textContent = "❤️";
 
-      heart.style.left = (Math.random() * 100) + "vw";
-      heart.style.fontSize = (Math.random() * 20 + 20) + "px";
+      // Kích thước tim responsive
+      const root = getComputedStyle(document.documentElement);
+      const hMin = parseFloat(root.getPropertyValue("--heartMin"));
+      const hMax = parseFloat(root.getPropertyValue("--heartMax"));
+      const size = rand(hMin, hMax);
+      heart.style.fontSize = size + "px";
+
+      // Đặt vị trí spawn tại (x,y)
+      heart.style.left = x + "px";
+      heart.style.top  = y + "px";
+
+      // Độ lệch ngang khi bay (nhẹ nhàng)
+      const drift = rand(-40, 40);           // px
+      heart.style.setProperty("--x0", "0px");
+      heart.style.setProperty("--x1", drift + "px");
+
+      // Tốc độ bay random (nhẹ hơn trên mobile)
+      const isMobile = window.matchMedia("(max-width: 600px)").matches;
+      const duration = isMobile ? rand(5.5, 7.5) : rand(6, 9);
+      heart.style.animationDuration = duration + "s";
 
       document.body.appendChild(heart);
-      setTimeout(() => heart.remove(), 6000);
-    }, 500);
+      setTimeout(() => heart.remove(), duration * 1000 + 200);
+    }
+
+    // Nhịp spawn: mobile thưa hơn để mượt
+    function startHearts(){
+      const isMobile = window.matchMedia("(max-width: 600px)").matches;
+      const interval = isMobile ? 650 : 450;
+      setInterval(spawnHeart, interval);
+    }
+
+    startHearts();
+
+    // Khi xoay màn hình / resize: không cần làm gì nhiều, vì mỗi lần spawn sẽ tính vùng cấm mới
   </script>
 </body>
 </html>
