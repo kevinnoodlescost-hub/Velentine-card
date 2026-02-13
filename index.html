@@ -373,7 +373,7 @@
       .envelope{ width: 98vw; }
       .open .letter{ transform: translateY(-88%); }
       .context .text{ max-height: 52vh; }
-      .open .stamp{ right: 1.5%; top: 5%; }
+      .open .stamp{ right: 0.5%; top: 5%; }
     }
   </style>
 </head>
@@ -655,7 +655,7 @@
       if(bgSpawned) return;
       bgSpawned = true;
 
-      const files = ["background 1.jpg", "background 2.jpg", "background 3.jpg"];
+      const files = ["background 1.JPG", "background 2.jpg", "background 3."];
       files.forEach((f, i) => createFloatingBgImage(f, i));
     }
 
