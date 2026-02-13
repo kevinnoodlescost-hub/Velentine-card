@@ -48,6 +48,26 @@
       100% { transform: translate(var(--x1), -20vh) rotate(360deg); opacity:0; }
     }
 
+    /* ✅ (2) Ảnh nền bay lơ lửng (nằm giữa hearts và panel) */
+    .floatImg{
+      position:fixed;
+      z-index:2;               /* > hearts (1) và < stage/panel (3) */
+      pointer-events:none;
+      opacity:0;
+      will-change:transform, opacity;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,0.18));
+      animation: floatImgUp linear infinite;
+      transform: translate(var(--x0), 110vh) rotate(var(--r0));
+      border-radius: 16px;
+    }
+    @keyframes floatImgUp{
+      0%   { transform: translate(var(--x0), 112vh) rotate(var(--r0)); opacity:0; }
+      10%  { opacity: .40; }
+      50%  { opacity: .46; }
+      92%  { opacity: .30; }
+      100% { transform: translate(var(--x1), -28vh) rotate(var(--r1)); opacity:0; }
+    }
+
     .stage{ position:relative; z-index:3; width:var(--cardW); }
 
     .panel{
@@ -148,7 +168,7 @@
     .open .stamp{
       right: 2%;
       top: 6%;
-      transform: rotate(7deg); /* giữ cảm giác nghiêng tự nhiên */
+      transform: rotate(7deg);
     }
 
     .seal{
@@ -181,11 +201,10 @@
       padding: clamp(14px, 3vw, 22px);
       text-align:left;
       transition: transform 1s ease;
-      overflow:hidden; /* để nút cuộn nằm gọn trong thư */
+      overflow:hidden;
       z-index: 1;
     }
 
-    /* Khung cuộn nội dung bên trong thư */
     .letterContent{
       height: 100%;
       overflow:auto;
@@ -206,11 +225,9 @@
     .open .env-flap{ transform: rotateX(180deg); }
     .open .letter{ transform: translateY(-58%); }
 
-    /* Nút xuất hiện sau khi mở thư */
     #btnContinue{ display:none; }
     .opened #btnContinue{ display:inline-block; }
 
-    /* Nút cuộn trong thư */
     .scrollBtns{
       position:absolute;
       right:10px;
@@ -237,7 +254,6 @@
     }
     .scrollBtn:active{ transform: translateY(1px); }
 
-    /* Ẩn nút khi chưa mở thư */
     .scrollBtns{ opacity:0; transform: translateY(6px); pointer-events:none; transition: .2s ease; }
     .open .scrollBtns{ opacity:1; transform:none; pointer-events:auto; }
 
@@ -285,7 +301,7 @@
     }
 
     @media (prefers-reduced-motion: reduce){
-      .heart{ animation:none; opacity:0; }
+      .heart, .floatImg{ animation:none; opacity:0; }
       .env-flap, .letter{ transition:none; }
       .letterContent{ scroll-behavior:auto; }
     }
@@ -296,13 +312,11 @@
        2) TRANG 2: Ô CHỮ BÊN PHẢI ZOOM LỚN + CUỘN TRONG Ô
        ========================================================== */
 
-    /* ===== TRANG 1: ENVELOPE LỚN HƠN ===== */
     .envelope{
       width: min(640px, 96vw);
       aspect-ratio: 16/10;
     }
 
-    /* ===== TRANG 1: LÁ THƯ GẦN FULL PHONG BÌ ===== */
     .letter{
       left: 4.5%;
       right: 4.5%;
@@ -327,7 +341,6 @@
       padding-right: 10px;
     }
 
-    /* ===== TRANG 2: ZOOM Ô CHỮ BÊN PHẢI + CUỘN TRONG Ô ===== */
     .mapGrid{
       grid-template-columns: 1fr 1.18fr;
     }
@@ -360,8 +373,6 @@
       .envelope{ width: 98vw; }
       .open .letter{ transform: translateY(-88%); }
       .context .text{ max-height: 52vh; }
-
-      /* ✅ stamp trên mobile: đẩy sát hơn nữa */
       .open .stamp{ right: 1.5%; top: 5%; }
     }
   </style>
@@ -555,7 +566,6 @@
       }
     }
 
-    // Hearts tránh đè panel
     function rand(min, max){ return Math.random() * (max - min) + min; }
 
     function getNoSpawnZone(){
@@ -605,14 +615,60 @@
     const isMobile = matchMedia("(max-width: 600px)").matches;
     setInterval(spawnHeart, isMobile ? 650 : 450);
 
+    /* ✅ (2) Sau khi mở thư: thêm 3 ảnh nền bay lơ lửng */
+    let bgSpawned = false;
+
+    function createFloatingBgImage(src, index){
+      const img = document.createElement("img");
+      img.className = "floatImg";
+      img.src = src;
+      img.alt = "Floating background " + (index + 1);
+
+      // Kích thước ảnh: nhẹ nhàng, không lấn panel
+      const base = Math.min(innerWidth, innerHeight);
+      const wMin = Math.max(90, base * 0.16);
+      const wMax = Math.max(140, base * 0.24);
+      img.style.width = rand(wMin, wMax) + "px";
+      img.style.height = "auto";
+
+      // Tránh đè panel
+      const {x} = pickSpawnPoint();
+      img.style.left = x + "px";
+      img.style.top = rand(0, innerHeight * 0.35) + "px";
+
+      // Drift + rotate
+      const drift = rand(-140, 140);
+      img.style.setProperty("--x0", "0px");
+      img.style.setProperty("--x1", drift + "px");
+      img.style.setProperty("--r0", rand(-10, 10) + "deg");
+      img.style.setProperty("--r1", rand(-18, 18) + "deg");
+
+      // Animation
+      const dur = isMobile ? rand(18, 26) : rand(20, 30);
+      img.style.animationDuration = dur + "s";
+      img.style.animationDelay = (index * 1.6) + "s";
+
+      document.body.appendChild(img);
+    }
+
+    function spawnBgImagesOnce(){
+      if(bgSpawned) return;
+      bgSpawned = true;
+
+      const files = ["background 1.jpg", "background 2.jpg", "background 3.jpg"];
+      files.forEach((f, i) => createFloatingBgImage(f, i));
+    }
+
     // ===== Flow =====
     $("btnOpen").addEventListener("click", async () => {
       envelope.classList.add("open");
       envPanel.classList.add("opened");
       await tryPlayMusic();
 
-      // khi mở thư: đưa scroll về đầu để bé đọc từ đầu
       if(letterContent) letterContent.scrollTop = 0;
+
+      // ✅ (2) mở thư xong thì bật 3 ảnh nền bay
+      spawnBgImagesOnce();
     });
 
     $("btnContinue").addEventListener("click", () => {
@@ -631,7 +687,6 @@
       showScene(sceneFinal);
     });
 
-    // ===== Nút cuộn thư =====
     function scrollLetter(delta){
       if(!letterContent) return;
       letterContent.scrollBy({ top: delta, behavior: "smooth" });
@@ -640,7 +695,6 @@
     $("btnScrollDown").addEventListener("click", () => scrollLetter(220));
     $("btnScrollUp").addEventListener("click", () => scrollLetter(-220));
 
-    // Ẩn/hiện nút theo vị trí cuộn
     function updateScrollButtons(){
       if(!letterContent) return;
       const up = $("btnScrollUp");
