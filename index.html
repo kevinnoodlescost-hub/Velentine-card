@@ -171,9 +171,26 @@
       padding: clamp(14px, 3vw, 22px);
       text-align:left;
       transition: transform 1s ease;
+      overflow:hidden; /* ✅ để nút cuộn nằm gọn trong thư */
     }
+
+    /* ✅ Khung cuộn nội dung bên trong thư */
+    .letterContent{
+      height: 100%;
+      overflow:auto;
+      padding-right: 6px; /* chừa chỗ scrollbar */
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    /* Tùy chọn: scrollbar đẹp nhẹ (Chrome/Edge) */
+    .letterContent::-webkit-scrollbar{ width:8px; }
+    .letterContent::-webkit-scrollbar-thumb{
+      background: rgba(255,77,109,0.35);
+      border-radius: 99px;
+    }
+
     .letter h3{ margin:0 0 8px 0; font-size: clamp(16px, 2.6vw, 20px); }
-    .letter p{ margin:0; font-size: clamp(13px, 2.1vw, 16px); line-height:1.65; }
+    .letter p{ margin:0 0 12px 0; font-size: clamp(13px, 2.1vw, 16px); line-height:1.65; }
     .letter .sig{ margin-top: 10px; font-weight:700; }
 
     .open .env-flap{ transform: rotateX(180deg); }
@@ -182,6 +199,37 @@
     /* Nút xuất hiện sau khi mở thư */
     #btnContinue{ display:none; }
     .opened #btnContinue{ display:inline-block; }
+
+    /* ✅ Nút cuộn trong thư */
+    .scrollBtns{
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      z-index:5;
+    }
+    .scrollBtn{
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: none;
+      cursor:pointer;
+      background: rgba(255,77,109,0.95);
+      color:#fff;
+      font-size:18px;
+      line-height:40px;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+      padding:0;
+    }
+    .scrollBtn:active{ transform: translateY(1px); }
+
+    /* Ẩn nút khi chưa mở thư */
+    .scrollBtns{ opacity:0; transform: translateY(6px); pointer-events:none; transition: .2s ease; }
+    .open .scrollBtns{ opacity:1; transform:none; pointer-events:auto; }
 
     /* Map */
     .mapGrid{
@@ -229,6 +277,7 @@
     @media (prefers-reduced-motion: reduce){
       .heart{ animation:none; opacity:0; }
       .env-flap, .letter{ transition:none; }
+      .letterContent{ scroll-behavior:auto; }
     }
   </style>
 </head>
@@ -248,7 +297,6 @@
           <div class="env-body"></div>
           <div class="env-flap"></div>
 
-          <!-- ✅ Stamp bằng ảnh -->
           <div class="stamp" aria-label="Love stamp">
             <img src="love stamp.jpg" alt="Love stamp">
           </div>
@@ -256,19 +304,48 @@
           <div class="seal">💌</div>
 
           <div class="letter">
-            <h3>Gửi bé Kịt,</h3>
-            <p>
-              Vậy là mình đã đi cùng nhau được 4 tháng. Có lúc vui, có lúc không dễ,
-              nhưng điều anh chắc nhất là: anh vẫn muốn nắm tay bé và cùng đi tiếp.<br><br>
-              Hôm nay anh viết lá thư này để hỏi một điều đơn giản thôi…
-            </p>
-            <p class="sig">— Anh</p>
+            <!-- ✅ Nội dung thư cuộn được -->
+            <div id="letterContent" class="letterContent">
+              <h3>Gửi bé Kịt,</h3>
+              <p>
+                Vậy là mình đã đi cùng nhau được 4 tháng. Có lúc vui, có lúc không dễ,
+                nhưng điều anh chắc nhất là: anh vẫn muốn nắm tay bé và cùng đi tiếp.
+              </p>
+
+              <p>
+                Hôm nay anh viết lá thư này để nói nhiều hơn một chút… (bé có thể kéo/scroll để đọc tiếp nha)
+              </p>
+
+              <!-- ✅ Bạn cứ viết dài thêm thoải mái -->
+              <p>
+                [Viết tiếp ở đây…] Anh thích cách bé cười, cách bé quan tâm những điều nhỏ.
+                Có những ngày mệt, chỉ cần nghe bé nói vài câu là anh thấy bình yên hơn.
+              </p>
+
+              <p>
+                [Viết tiếp…] Dù tụi mình có lúc không cùng nhịp, anh vẫn muốn học cách yêu bé đúng hơn,
+                kiên nhẫn hơn, và tử tế hơn.
+              </p>
+
+              <p>
+                [Viết tiếp…] Và nếu bé cho phép, anh muốn mình có thêm thật nhiều kỷ niệm mới,
+                để sau này nhìn lại, tụi mình thấy “à, hoá ra tụi mình đã cố gắng vì nhau nhiều như vậy.”
+              </p>
+
+              <p class="sig">— Anh</p>
+              <div style="height:10px"></div>
+            </div>
+
+            <!-- ✅ Nút cuộn trong thư -->
+            <div class="scrollBtns" aria-label="Nút cuộn thư">
+              <button id="btnScrollDown" class="scrollBtn" title="Cuộn xuống">↓</button>
+              <button id="btnScrollUp" class="scrollBtn" title="Cuộn lên">↑</button>
+            </div>
           </div>
         </div>
 
         <div class="btnRow">
           <button id="btnOpen">Mở thư ✉️</button>
-          <!-- ✅ Nút này chỉ hiện sau khi thư đã kéo lên -->
           <button id="btnContinue" class="btnGhost">Đọc xong rồi 👉</button>
         </div>
       </div>
@@ -346,6 +423,7 @@
     const envelope = $("envelope");
     const bgm = $("bgm");
     const envPanel = $("envPanel");
+    const letterContent = $("letterContent");
 
     function showScene(scene){
       for (const s of [sceneEnvelope, sceneAsk, sceneMap, sceneFinal]) s.classList.remove("active");
@@ -411,12 +489,14 @@
     const isMobile = matchMedia("(max-width: 600px)").matches;
     setInterval(spawnHeart, isMobile ? 650 : 450);
 
-    // ===== Flow (FIX) =====
+    // ===== Flow =====
     $("btnOpen").addEventListener("click", async () => {
       envelope.classList.add("open");
-      envPanel.classList.add("opened");   // ✅ hiện nút "Đọc xong rồi"
-      await tryPlayMusic();               // nhạc bắt đầu khi mở thư
-      // ❌ Không tự chuyển scene nữa
+      envPanel.classList.add("opened");
+      await tryPlayMusic();
+
+      // ✅ khi mở thư: đưa scroll về đầu để bé đọc từ đầu
+      if(letterContent) letterContent.scrollTop = 0;
     });
 
     $("btnContinue").addEventListener("click", () => {
@@ -434,6 +514,31 @@
     $("btnToFinal").addEventListener("click", () => {
       showScene(sceneFinal);
     });
+
+    // ===== Nút cuộn thư =====
+    function scrollLetter(delta){
+      if(!letterContent) return;
+      letterContent.scrollBy({ top: delta, behavior: "smooth" });
+    }
+
+    $("btnScrollDown").addEventListener("click", () => scrollLetter(220));
+    $("btnScrollUp").addEventListener("click", () => scrollLetter(-220));
+
+    // (Tuỳ chọn) Ẩn/hiện nút theo vị trí cuộn
+    function updateScrollButtons(){
+      if(!letterContent) return;
+      const up = $("btnScrollUp");
+      const down = $("btnScrollDown");
+      const atTop = letterContent.scrollTop <= 2;
+      const atBottom = letterContent.scrollTop + letterContent.clientHeight >= letterContent.scrollHeight - 2;
+
+      up.style.opacity = atTop ? 0.35 : 1;
+      down.style.opacity = atBottom ? 0.35 : 1;
+    }
+    if(letterContent){
+      letterContent.addEventListener("scroll", updateScrollButtons);
+      updateScrollButtons();
+    }
   </script>
 </body>
 </html>
